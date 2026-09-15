@@ -26,3 +26,13 @@ export function convertAmount(amount, currency = 'USD') {
   }
   return amount
 }
+
+// Inverse of convertAmount: turns an amount entered in the display currency back into
+// USD, which is what the API stores. Yen is left unrounded on purpose: rounding the unit
+// price (even to 4 decimals) drifts once multiplied by quantity (350 x ¥1 shows as ¥352).
+export function toUsd(amount, currency = 'USD') {
+  if (currency === 'JPY') {
+    return amount / USD_TO_JPY
+  }
+  return Math.round(amount * 100) / 100
+}

@@ -7,6 +7,7 @@ export default {
     finance: '財務',
     demandForecast: '需要予測',
     restocking: '補充発注',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -133,6 +134,50 @@ export default {
       expectedDelivery: '予定配達日',
       actualDelivery: '実際の配達日'
     }
+  },
+
+  // Reports
+  reports: {
+    title: '業績レポート',
+    description: '四半期実績と月次売上推移を表示',
+    quarterlyPerformance: '四半期実績',
+    monthlyRevenueTrend: '月次売上推移',
+    monthOverMonth: '前月比分析',
+    noData: '選択したフィルターのデータがありません',
+    loadError: 'レポートの読み込みに失敗しました',
+    notApplicable: '該当なし',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総売上',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '売上',
+      change: '変動',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenue: '総売上',
+      avgMonthlyRevenue: '平均月次売上',
+      totalOrders: '総注文数',
+      bestQuarter: '最高業績の四半期'
+    }
+  },
+
+  // Backlog
+  backlog: {
+    title: 'バックログ管理',
+    description: '在庫不足の追跡と解消',
+    loading: 'バックログを読み込み中...',
+    loadError: 'バックログの読み込みに失敗しました',
+    highPriority: '高優先度',
+    mediumPriority: '中優先度',
+    lowPriority: '低優先度',
+    totalItems: '総バックログ品目数',
+    cardTitle: 'バックログ品目',
+    noItems: '在庫不足なし - すべての注文を履行できます！'
   },
 
   // Finance/Spending
@@ -357,6 +402,44 @@ export default {
     english: 'English',
     japanese: '日本語',
     selectLanguage: '言語を選択'
+  },
+
+  // Purchase Orders
+  purchaseOrder: {
+    createTitle: '発注書を作成',
+    viewTitle: '発注書の詳細',
+    shortageOf: '{count}単位の不足',
+    createButton: '発注書作成',
+    viewButton: '発注書を表示',
+    actions: '操作',
+    supplierName: 'サプライヤー名',
+    supplierNamePlaceholder: 'サプライヤー名を入力',
+    quantity: '数量',
+    unitCost: '単価',
+    expectedDeliveryDate: '納品予定日',
+    notes: '備考',
+    notesPlaceholder: '任意の備考...',
+    submit: '発注書を作成',
+    submitting: '作成中...',
+    cancel: 'キャンセル',
+    close: '閉じる',
+    poId: '発注書ID',
+    supplier: 'サプライヤー',
+    total: '合計',
+    status: 'ステータス',
+    createdDate: '作成日',
+    loading: '発注書を読み込み中...',
+    loadError: '発注書の読み込みに失敗しました',
+    notFound: '発注書が見つかりません',
+    noNotes: '備考なし',
+    statusPending: '保留中',
+    validation: {
+      supplierRequired: 'サプライヤー名は必須です',
+      quantityPositive: '数量は0より大きい値である必要があります',
+      unitCostPositive: '単価は0より大きい値である必要があります',
+      dateRequired: '納品予定日は必須です',
+      dateNotPast: '納品予定日は過去の日付にできません'
+    }
   },
 
   // Common

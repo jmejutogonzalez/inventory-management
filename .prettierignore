@@ -1,0 +1,7 @@
+# Mock data fixtures are large and hand-maintained; reformatting them only adds diff noise
+server/data/
+
+# Generated files
+node_modules/
+package-lock.json
+client/dist/
