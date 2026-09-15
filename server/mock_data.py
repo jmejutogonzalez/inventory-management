@@ -39,5 +39,9 @@ purchase_orders = load_json_file('purchase_orders.json')
 # apart from `orders` so customer revenue KPIs (dashboard, reports, spending) are unaffected.
 restock_orders = []
 
+# Tasks added from the Tasks modal. In-memory only; the client's built-in demo tasks
+# live in useAuth.js and are merged with these on the client.
+tasks = []
+
 # All data is now loaded from JSON files in the data/ directory
 # This allows for easier maintenance and updates of the sample data

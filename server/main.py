@@ -1,10 +1,11 @@
+import itertools
 import threading
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
-from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders, restock_orders
+from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders, restock_orders, tasks
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -104,6 +105,9 @@ class BacklogItem(BaseModel):
     days_delayed: int
     priority: str
     has_purchase_order: Optional[bool] = False
+    # The dashboard switches "Create PO" to "View PO" based on this id, so it must
+    # come from the server or the switch is lost on reload
+    purchase_order_id: Optional[str] = None
 
 class PurchaseOrder(BaseModel):
     id: str
@@ -118,11 +122,30 @@ class PurchaseOrder(BaseModel):
 
 class CreatePurchaseOrderRequest(BaseModel):
     backlog_item_id: str
-    supplier_name: str
-    quantity: int
-    unit_cost: float
-    expected_delivery_date: str
+    supplier_name: str = Field(min_length=1)
+    quantity: int = Field(gt=0)
+    unit_cost: float = Field(gt=0)
+    expected_delivery_date: date
     notes: Optional[str] = None
+
+PURCHASE_ORDER_STATUS_PENDING = "pending"
+
+TaskPriority = Literal["high", "medium", "low"]
+TaskStatus = Literal["pending", "completed"]
+
+# Field names are camelCase because the client's built-in demo tasks (useAuth.js)
+# already use this shape and TasksModal renders both lists together.
+class Task(BaseModel):
+    id: str
+    title: str
+    priority: TaskPriority
+    dueDate: str
+    status: TaskStatus
+
+class CreateTaskRequest(BaseModel):
+    title: str = Field(min_length=1)
+    priority: TaskPriority = "medium"
+    dueDate: date
 
 class RestockOrderItemRequest(BaseModel):
     sku: str
@@ -158,6 +181,10 @@ RESTOCK_STATUS_SUBMITTED = "Submitted"
 # Sync endpoints run in FastAPI's thread pool, so two simultaneous POSTs could both
 # read the same max id before either appends. The lock makes id assignment + append atomic.
 restock_orders_lock = threading.Lock()
+# Same race applies to the other in-memory collections that assign ids on create
+purchase_orders_lock = threading.Lock()
+tasks_lock = threading.Lock()
+task_id_counter = itertools.count(1)
 
 # API endpoints
 @app.get("/")
@@ -208,15 +235,102 @@ def get_demand_forecasts():
 @app.get("/api/backlog", response_model=List[BacklogItem])
 def get_backlog():
     """Get backlog items with purchase order status"""
-    # Add has_purchase_order flag to each backlog item
+    po_ids_by_backlog_item = {po["backlog_item_id"]: po["id"] for po in purchase_orders}
     result = []
     for item in backlog_items:
         item_dict = dict(item)
-        # Check if this backlog item has a purchase order
-        has_po = any(po["backlog_item_id"] == item["id"] for po in purchase_orders)
-        item_dict["has_purchase_order"] = has_po
+        item_dict["purchase_order_id"] = po_ids_by_backlog_item.get(item["id"])
+        item_dict["has_purchase_order"] = item_dict["purchase_order_id"] is not None
         result.append(item_dict)
     return result
+
+@app.get("/api/purchase-orders/{backlog_item_id}", response_model=PurchaseOrder)
+def get_purchase_order_by_backlog_item(backlog_item_id: str):
+    """Get the purchase order raised for a backlog item"""
+    po = next((po for po in purchase_orders if po["backlog_item_id"] == backlog_item_id), None)
+    if not po:
+        raise HTTPException(status_code=404, detail="Purchase order not found")
+    return po
+
+@app.post("/api/purchase-orders", response_model=PurchaseOrder, status_code=201)
+def create_purchase_order(request: CreatePurchaseOrderRequest):
+    """Raise a purchase order for a backlog item. Stored in memory only (reset on restart)."""
+    if not any(item["id"] == request.backlog_item_id for item in backlog_items):
+        raise HTTPException(status_code=404, detail="Backlog item not found")
+
+    supplier_name = request.supplier_name.strip()
+    if not supplier_name:
+        raise HTTPException(status_code=422, detail="Supplier name must not be blank")
+    if request.expected_delivery_date < date.today():
+        raise HTTPException(status_code=422, detail="Expected delivery date cannot be in the past")
+
+    with purchase_orders_lock:
+        # Checked inside the lock so two concurrent requests can't both raise a PO
+        # for the same item; the lookup endpoint assumes at most one per backlog item
+        if any(po["backlog_item_id"] == request.backlog_item_id for po in purchase_orders):
+            raise HTTPException(status_code=409, detail="Backlog item already has a purchase order")
+        next_id = max((int(po["id"]) for po in purchase_orders), default=0) + 1
+        po = {
+            "id": str(next_id),
+            "backlog_item_id": request.backlog_item_id,
+            "supplier_name": supplier_name,
+            "quantity": request.quantity,
+            "unit_cost": request.unit_cost,
+            "expected_delivery_date": request.expected_delivery_date.isoformat(),
+            "status": PURCHASE_ORDER_STATUS_PENDING,
+            "created_date": datetime.now().replace(microsecond=0).isoformat(),
+            "notes": request.notes
+        }
+        purchase_orders.append(po)
+    return po
+
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    """Get tasks created through the API, newest first"""
+    return list(reversed(tasks))
+
+@app.post("/api/tasks", response_model=Task, status_code=201)
+def create_task(request: CreateTaskRequest):
+    """Create a task. Stored in memory only (reset on restart)."""
+    title = request.title.strip()
+    if not title:
+        raise HTTPException(status_code=422, detail="Task title must not be blank")
+
+    with tasks_lock:
+        # A counter rather than max(id)+1: tasks can be deleted, and reusing a deleted
+        # id would let a stale toggle/delete from another tab hit the wrong task
+        next_number = next(task_id_counter)
+        task = {
+            # Prefixed because App.vue treats any id matching a built-in demo task
+            # (numeric 1, 2, ...) as local-only and would never call the API for it
+            "id": f"task-{next_number}",
+            "title": title,
+            "priority": request.priority,
+            "dueDate": request.dueDate.isoformat(),
+            "status": "pending"
+        }
+        tasks.append(task)
+    return task
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: str):
+    """Toggle a task between pending and completed"""
+    with tasks_lock:
+        task = next((task for task in tasks if task["id"] == task_id), None)
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        task["status"] = "pending" if task["status"] == "completed" else "completed"
+        return dict(task)
+
+@app.delete("/api/tasks/{task_id}", status_code=204)
+def delete_task(task_id: str):
+    """Delete a task"""
+    with tasks_lock:
+        index = next((i for i, task in enumerate(tasks) if task["id"] == task_id), None)
+        if index is None:
+            raise HTTPException(status_code=404, detail="Task not found")
+        # Delete in place: main.py and mock_data share this list object
+        del tasks[index]
 
 @app.get("/api/restock-orders", response_model=List[RestockOrder])
 def get_restock_orders():

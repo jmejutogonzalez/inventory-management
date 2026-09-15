@@ -359,6 +359,44 @@ export default {
     selectLanguage: '言語を選択'
   },
 
+  // Purchase Orders
+  purchaseOrder: {
+    createTitle: '発注書を作成',
+    viewTitle: '発注書の詳細',
+    shortageOf: '{count}単位の不足',
+    createButton: '発注書作成',
+    viewButton: '発注書を表示',
+    actions: '操作',
+    supplierName: 'サプライヤー名',
+    supplierNamePlaceholder: 'サプライヤー名を入力',
+    quantity: '数量',
+    unitCost: '単価',
+    expectedDeliveryDate: '納品予定日',
+    notes: '備考',
+    notesPlaceholder: '任意の備考...',
+    submit: '発注書を作成',
+    submitting: '作成中...',
+    cancel: 'キャンセル',
+    close: '閉じる',
+    poId: '発注書ID',
+    supplier: 'サプライヤー',
+    total: '合計',
+    status: 'ステータス',
+    createdDate: '作成日',
+    loading: '発注書を読み込み中...',
+    loadError: '発注書の読み込みに失敗しました',
+    notFound: '発注書が見つかりません',
+    noNotes: '備考なし',
+    statusPending: '保留中',
+    validation: {
+      supplierRequired: 'サプライヤー名は必須です',
+      quantityPositive: '数量は0より大きい値である必要があります',
+      unitCostPositive: '単価は0より大きい値である必要があります',
+      dateRequired: '納品予定日は必須です',
+      dateNotPast: '納品予定日は過去の日付にできません'
+    }
+  },
+
   // Common
   common: {
     loading: '読み込み中...',
