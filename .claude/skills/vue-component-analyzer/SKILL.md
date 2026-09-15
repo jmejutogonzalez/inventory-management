@@ -51,7 +51,7 @@ Use the format below. Rank by **impact ÷ effort**. Cap at ~10 findings for a wh
 
 ## Report Format
 
-```markdown
+````markdown
 # Vue Component Analysis: <target>
 
 ## Summary
@@ -82,7 +82,7 @@ Use the format below. Rank by **impact ÷ effort**. Cap at ~10 findings for a wh
 
 ## Suggested next step
 <Which findings to hand to vue-expert first, grouped into coherent PR-sized batches>
-```
+````
 
 ## Project-Specific Rules to Respect
 

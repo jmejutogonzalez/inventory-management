@@ -78,12 +78,12 @@
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">{{ t('purchaseOrder.unitCost') }} *</label>
+                  <label class="form-label">{{ t('purchaseOrder.unitCost') }} ({{ currencySymbol }}) *</label>
                   <input
                     v-model.number="form.unit_cost"
                     type="number"
-                    min="0.01"
-                    step="0.01"
+                    :min="currentCurrency === 'JPY' ? 1 : 0.01"
+                    :step="currentCurrency === 'JPY' ? 1 : 0.01"
                     class="form-input"
                     required
                   />
@@ -218,7 +218,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useI18n } from '../composables/useI18n'
-import { formatCurrency } from '../utils/currency'
+import { formatCurrency, toUsd } from '../utils/currency'
 import { api } from '../api'
 
 const { t, translateProductName, currentCurrency, currentLocale } = useI18n()
@@ -239,6 +239,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'po-created'])
+
+const currencySymbol = computed(() => (currentCurrency.value === 'JPY' ? '¥' : '$'))
 
 const shortage = computed(() => {
   if (!props.backlogItem) return 0
@@ -294,7 +296,8 @@ const submitForm = async () => {
       backlog_item_id: props.backlogItem.id,
       supplier_name: form.value.supplier_name.trim(),
       quantity: form.value.quantity,
-      unit_cost: form.value.unit_cost,
+      // Entered in the currency shown on screen; the API stores USD
+      unit_cost: toUsd(form.value.unit_cost, currentCurrency.value),
       expected_delivery_date: form.value.expected_delivery_date,
       notes: form.value.notes || undefined
     })
@@ -339,6 +342,12 @@ const loadPurchaseOrder = async () => {
     viewLoading.value = false
   }
 }
+
+// Switching language also switches currency, which would silently reinterpret a typed
+// price (12.50 USD becoming 12.50 JPY), so clear it and let the user re-enter
+watch(currentCurrency, () => {
+  form.value.unit_cost = ''
+})
 
 // Dashboard sets item, mode and isOpen in the same tick; one watcher over all three
 // resets state once per open instead of firing separate (duplicate) loads
