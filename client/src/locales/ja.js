@@ -6,6 +6,7 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充発注',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -112,7 +113,12 @@ export default {
     onTimeDelivery: '定時配達',
     itemsCount: '{count}件',
     quantity: '数量',
+    submittedOrders: '発注済みの補充注文',
+    noSubmittedOrders: '補充注文はまだありません',
     table: {
+      createdDate: '作成日',
+      leadTime: 'リードタイム',
+      totalCost: '合計費用',
       orderNumber: '注文番号',
       orderId: '注文ID',
       orderDate: '注文日',
@@ -188,6 +194,47 @@ export default {
     }
   },
 
+  // Restocking
+  restocking: {
+    title: '補充発注',
+    description: '全倉庫の30日間需要予測に基づいて補充注文を計画',
+    budget: '予算',
+    budgetHint: '需要トレンドと伸び率の順に予算を割り当てます。最後の品目は一部数量になります。',
+    plannedSpend: '計画支出',
+    remaining: '残額',
+    itemsSelected: '選択品目',
+    longestLeadTime: '最長リードタイム',
+    days: '{count}日',
+    recommendations: '推奨品目',
+    include: '含める',
+    table: {
+      sku: 'SKU',
+      itemName: '品目名',
+      trend: 'トレンド',
+      forecastQty: '予測数量',
+      recommendedQty: '推奨数量',
+      fundingStatus: '割当',
+      unitCost: '単価',
+      lineTotal: '小計',
+      leadTime: 'リードタイム',
+      total: '合計'
+    },
+    fundingStatus: {
+      full: '全数',
+      partial: '一部',
+      unfunded: '予算外',
+      excluded: '除外'
+    },
+    placeOrder: '発注する',
+    placing: '発注中...',
+    orderPlaced: '発注済み',
+    orderSuccess: '注文 {orderNumber} を発注しました。納品予定日: {date}',
+    orderError: '発注に失敗しました',
+    viewOrders: '注文一覧で確認',
+    increaseBudget: '推奨品目を表示するには予算を増やしてください',
+    nothingSelected: '品目が選択されていません'
+  },
+
   // Filters
   filters: {
     timePeriod: '期間',
@@ -204,6 +251,7 @@ export default {
     shipped: '出荷済み',
     processing: '処理中',
     backordered: 'バックオーダー',
+    submitted: '発注済み',
     inStock: '在庫あり',
     lowStock: '在庫僅少',
     adequate: '適量'
@@ -359,7 +407,14 @@ export default {
     '48V DC Power Supply Unit': '48V DC電源ユニット',
     'USB-C PD 100W Power Supply': 'USB-C PD 100W電源',
     'Battery Backup Power Supply': 'バッテリバックアップ電源',
-    'Adjustable Bench Power Supply': '可変ベンチ電源'
+    'Adjustable Bench Power Supply': '可変ベンチ電源',
+    'Industrial Widget Type A': '産業用ウィジェット タイプA',
+    'Steel Bearing Assembly': 'スチールベアリング組立',
+    'High-Temperature Gasket': '耐熱ガスケット',
+    'Electric Motor 5HP': '電動モータ 5HP',
+    'Oil Filter Cartridge': 'オイルフィルターカートリッジ',
+    'Pressure Relief Valve': '圧力逃がし弁',
+    'Logic Controller Board': 'ロジックコントローラボード'
   },
 
   // Customer Names

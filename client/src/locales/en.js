@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -112,7 +113,12 @@ export default {
     onTimeDelivery: 'On-Time Delivery',
     itemsCount: '{count} items',
     quantity: 'Qty',
+    submittedOrders: 'Submitted Orders',
+    noSubmittedOrders: 'No restocking orders submitted yet',
     table: {
+      createdDate: 'Created',
+      leadTime: 'Lead Time',
+      totalCost: 'Total Cost',
       orderNumber: 'Order Number',
       orderId: 'Order ID',
       orderDate: 'Order Date',
@@ -188,6 +194,47 @@ export default {
     }
   },
 
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan restocking orders from the 30-day demand forecast across all warehouses',
+    budget: 'Budget',
+    budgetHint: 'Items are funded by demand trend, then growth. The last item that fits is partially funded.',
+    plannedSpend: 'Planned Spend',
+    remaining: 'Remaining',
+    itemsSelected: 'Items Selected',
+    longestLeadTime: 'Longest Lead Time',
+    days: '{count} days',
+    recommendations: 'Recommended Items',
+    include: 'Include',
+    table: {
+      sku: 'SKU',
+      itemName: 'Item',
+      trend: 'Trend',
+      forecastQty: 'Forecast Qty',
+      recommendedQty: 'Recommended Qty',
+      fundingStatus: 'Funding',
+      unitCost: 'Unit Cost',
+      lineTotal: 'Line Total',
+      leadTime: 'Lead Time',
+      total: 'Total'
+    },
+    fundingStatus: {
+      full: 'Full',
+      partial: 'Partial',
+      unfunded: 'Not funded',
+      excluded: 'Excluded'
+    },
+    placeOrder: 'Place Order',
+    placing: 'Placing order...',
+    orderPlaced: 'Order Placed',
+    orderSuccess: 'Order {orderNumber} submitted. Expected delivery {date}.',
+    orderError: 'Failed to place order',
+    viewOrders: 'View in Orders',
+    increaseBudget: 'Increase the budget to get recommendations',
+    nothingSelected: 'No items selected'
+  },
+
   // Filters
   filters: {
     timePeriod: 'Time Period',
@@ -204,6 +251,7 @@ export default {
     shipped: 'Shipped',
     processing: 'Processing',
     backordered: 'Backordered',
+    submitted: 'Submitted',
     inStock: 'In Stock',
     lowStock: 'Low Stock',
     adequate: 'Adequate'
